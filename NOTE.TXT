@@ -1,0 +1,16 @@
+Welcome to Big Sticky Note!
+
+Click Win-N to open this window.  ESC to close it.
+No need to save - The note is saved automatically.
+
+
+You can enter reminders, using the @time notation.   When the time comes, a reminder will appear.  Please use one reminder per line.
+For example:
+
+@Monday Go to the office
+@Friday Go home!
+@12:00 Remind me to eat lunch daily
+
+Now, Feel free to delete all of this, and enter your own notes.
+
+-Uri
