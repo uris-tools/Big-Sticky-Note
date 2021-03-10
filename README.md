@@ -1,5 +1,6 @@
 # Big-Sticky-Note
 
+=======
     Big Sticky Note
 
 
@@ -18,4 +19,3 @@
 
     The note is automatically saved in a text file.  10 historical copies are saved, so you can manually
     revert to older versions, by renaming the file.
-
