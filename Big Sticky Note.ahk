@@ -14,6 +14,7 @@
                 @16:00 Daily summary  (Note that the reminder is on the hour, not the exact time.  It might 
                                         alert anytime between 16:00 and 17:00)
                 @23/03 Send my report   
+				@today do something (will remind every hour)
 
     The note is automatically saved in a text file.  10 historical copies are saved, so you can manually
     revert to older versions, by renaming the file.
@@ -22,9 +23,10 @@
 
         1.2 - Addd alerts
         1.3 - Cleanup
+		1.4 - fixed Icon
 */
 
-global VERSION:="1.3"
+global VERSION:="1.4"
 
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -37,8 +39,8 @@ SetBatchLines, -1
 
 #include <AutoXYWH> 
 
+;Save the Note file for the compiled version.
 FileInstall, Note.txt, Note.txt, 0
-
 
 try menu, tray, Icon,StickyNote.ico
 Menu, Tray, NoStandard
@@ -55,6 +57,7 @@ Menu, Tray, add, Exit, closeApp
 global NOTE_FILE:="NOTE.TXT"
 global NOTES_INI_FILE:="StickyNote.ini"
 
+global hwnd_noteGUI
 global NoteEditBox
 global noteContent
 
@@ -68,6 +71,7 @@ global cursorPositionInNote:=0
 
 
 log("Sticky Note Version " VERSION " Starting. ")
+
 
 ; Read note text file
 FileRead, NoteContent, %NOTE_FILE%
@@ -89,6 +93,21 @@ log("Read note size " noteWidth "*" noteHeight " in pos " noteX "," noteY)
 createNoteScreen()
 
 SetTimer,remindersNotify,% 29*60*1000 ; check for alerts every 29 minutes
+
+
+;------------------------------------------------------------------
+;Check if this is the first time running
+IniRead,firstTimeRunning, %NOTES_INI_FILE%, General, firstTimeRunning,Yes
+if (firstTimeRunning=="Yes") {
+    IniWrite, No, %NOTES_INI_FILE%, General, firstTimeRunning
+    MsgBox, 4,Big Sticky Note,Welcome to Big Sticky Note !`n`nWould you BSN to  when you login (so that you could use it later?)`n`nIf you say No, you will need to start the EXE every time you login.
+    IfMsgBox, Yes 
+    {
+        FileCreateShortcut, %A_ScriptFullPath%, %A_Startup%\%A_ScriptName%.lnk, %A_ScriptDir% 
+    }
+    showNoteScreen()
+}
+;------------------------------------------------------------------
 
 ;To do on startup:
 ;showNoteScreen()
@@ -257,6 +276,7 @@ Edit_GetSelection(ByRef start, ByRef end, Control="", WinTitle="") {
 }
 
 
+
 /*
     When closing the window, save it's size and position, to return to it next time.
 */
@@ -324,6 +344,9 @@ remindersNotify() {
                         parsedDate:=today
                     }
                 }
+				if(Substr(timeIndication,1,3)="tod") {
+					parsedDate:=today
+				}
                 
 
                 ;31/12 (without year)
@@ -382,7 +405,16 @@ closeApp() {
 
 #n::
 	log("BigStickyNote - Hotkey pressed")
-	showNoteScreen()
+	if (WinActive("ahk_id" hwnd_noteGUI)) {
+		saveWindowPosition() 
+		GUI, NoteScreen:Default
+		Gui, NoteScreen:Submit
+		saveNoteFile()
+		Gui, NoteScreen:hide
+		
+	} else {
+		showNoteScreen()
+	}
 	return
 	;
 
